@@ -284,8 +284,8 @@ let impl sctx ~dir ~(lib : Dune_file.Library.t) ~scope ~modules =
           let impl_obj_dir =
             Utils.library_object_directory ~dir (snd lib.name) in
           let impl_cm_kind =
-            let { Mode.Dict. byte; native = _ } = Lib.modes vlib in
-            Mode.cm_kind (if byte then Byte else Native)
+            let { Mode.Dict. byte; js ; _} = Lib.modes vlib in
+            Mode.cm_kind (if js then Js else if byte then Byte else Native)
           in
           external_dep_graph sctx ~impl_cm_kind ~vlib_obj_dir ~impl_obj_dir
             ~vlib_modules

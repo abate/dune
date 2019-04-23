@@ -38,6 +38,7 @@ module Includes = struct
       { cmi = cmi_includes
       ; cmo = cmi_includes
       ; cmx = cmx_includes
+      ; cmj = cmi_includes
       }
 
   let empty =

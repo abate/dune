@@ -1,6 +1,6 @@
 open! Import
 
-type t = Byte | Native
+type t = Byte | Native | Js
 
 val decode : t Dune_lang.Decoder.t
 
@@ -24,6 +24,7 @@ module Dict : sig
   type 'a t =
     { byte   : 'a
     ; native : 'a
+    ; js     : 'a
     }
 
   val for_all : 'a t -> f:('a -> bool) -> bool
@@ -48,7 +49,7 @@ module Dict : sig
 
   val make_both : 'a -> 'a t
 
-  val make : byte:'a -> native:'a -> 'a t
+  val make : byte:'a -> native:'a -> js:'a -> 'a t
 
   module Set : sig
 

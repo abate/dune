@@ -11,6 +11,7 @@ let mt         = make "mt"
 let mt_posix   = make "mt_posix"
 let byte       = make "byte"
 let native     = make "native"
+let js         = make "js"
 let plugin     = make "plugin"
 
 let encode t = Dune_lang.atom_or_quoted_string (to_string t)

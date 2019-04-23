@@ -14,6 +14,7 @@ val mt         : t
 val mt_posix   : t
 val byte       : t
 val native     : t
+val js         : t
 val plugin     : t
 
 val encode     : t Dune_lang.Encoder.t

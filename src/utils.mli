@@ -30,6 +30,9 @@ val library_byte_dir       : obj_dir:Path.t -> Path.t
 val library_public_cmi_dir : obj_dir:Path.t -> Path.t
 val library_private_dir    : obj_dir:Path.t -> Path.t
 
+(* cmj *)
+val library_js_dir       : obj_dir:Path.t -> Path.t
+
 (** Return the directory where the object files for the given
     executable should be stored. *)
 val executable_object_directory

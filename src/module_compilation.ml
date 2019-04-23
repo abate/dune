@@ -51,11 +51,11 @@ let build_cm cctx ?sandbox ?(dynlink=true) ~dep_graphs
            .cmY and .cmi. We choose to use ocamlc to produce the cmi
            and to produce the cmx we have to wait to avoid race
            conditions. *)
-        | Cmo, None, false ->
+        | (Cmo | Cmj), None, false ->
           copy_interface ();
           [], [], [Module.cm_file_unsafe m Cmi]
         | Cmo, None, true
-        | (Cmo | Cmx), _, _ ->
+        | (Cmo | Cmx | Cmj), _, _ ->
           force_read_cmi src,
           [Module.cm_file_unsafe m Cmi],
           []
@@ -66,7 +66,7 @@ let build_cm cctx ?sandbox ?(dynlink=true) ~dep_graphs
       let other_targets =
         match cm_kind with
         | Cmx -> Module.obj_file m ~kind:Cmx ~ext:ctx.ext_obj :: other_targets
-        | Cmi | Cmo -> other_targets
+        | Cmi | Cmo | Cmj -> other_targets
       in
       let dep_graph = Ml_kind.Dict.get dep_graphs ml_kind in
       let opaque = CC.opaque cctx in
@@ -84,7 +84,7 @@ let build_cm cctx ?sandbox ?(dynlink=true) ~dep_graphs
       let other_targets, cmt_args =
         match cm_kind with
         | Cmx -> (other_targets, Arg_spec.S [])
-        | Cmi | Cmo ->
+        | Cmi | Cmo | Cmj ->
           let fn = Option.value_exn (Module.cmt_file m ml_kind) in
           (fn :: other_targets, A "-bin-annot")
       in
@@ -114,7 +114,7 @@ let build_cm cctx ?sandbox ?(dynlink=true) ~dep_graphs
           (ctx.build_dir, Arg_spec.As ["-no-keep-locs"])
         | true, Cmi, false ->
           (Obj_dir.byte_dir obj_dir, As []) (* emulated -no-keep-locs *)
-        | true, (Cmo | Cmx), _
+        | true, (Cmo | Cmx | Cmj), _
         | false, _, _ ->
           (ctx.build_dir, As [])
       in

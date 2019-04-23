@@ -278,8 +278,8 @@ module Package = struct
              To workaround this problem, for builtin packages we check
              that at least one of the archive is present. *)
           match archives pkg with
-          | { byte = []; native = [] } -> true
-          | { byte; native } -> List.exists (byte @ native) ~f:Path.exists
+          | { byte = []; native = [] ; js = [] } -> true
+          | { byte; native; js } -> List.exists (byte @ native @ js) ~f:Path.exists
     in
     if exists then
       Ok pkg

@@ -37,6 +37,7 @@ module Gen (P : sig val sctx : Super_context.t end) = struct
           match mode with
           | Byte -> ["-dllib"; "-l" ^ stubs_name; "-cclib"; "-l" ^ stubs_name]
           | Native -> ["-cclib"; "-l" ^ stubs_name]
+          | Js -> [ "-jslib"; "-l" ^ stubs_name ]
       in
       let map_cclibs =
         (* https://github.com/ocaml/dune/issues/119 *)
@@ -53,7 +54,7 @@ module Gen (P : sig val sctx : Super_context.t end) = struct
       in
       let obj_deps =
         match mode with
-        | Byte   -> obj_deps
+        | (Byte | Js) -> obj_deps
         | Native ->
           obj_deps >>>
           Build.paths (artifacts modules ~ext:ctx.ext_obj)
@@ -81,7 +82,7 @@ module Gen (P : sig val sctx : Super_context.t end) = struct
            ; Dyn (fun (cm_files, _, _, _) -> Deps cm_files)
            ; Hidden_targets
                (match mode with
-                | Byte -> []
+                | (Byte | Js)-> []
                 | Native -> [Library.archive lib ~dir ~ext:ctx.ext_lib])
            ]))
 

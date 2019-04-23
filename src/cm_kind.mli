@@ -1,6 +1,6 @@
 open Stdune
 
-type t = Cmi | Cmo | Cmx
+type t = Cmi | Cmo | Cmx | Cmj
 
 val all : t list
 val pp : t Fmt.t
@@ -16,6 +16,7 @@ module Dict : sig
     { cmi : 'a
     ; cmo : 'a
     ; cmx : 'a
+    ; cmj : 'a
     }
 
   val get : 'a t -> cm_kind -> 'a

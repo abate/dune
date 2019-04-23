@@ -119,6 +119,7 @@ let of_library_stanza ~dir
      ; native =
          Path.relative dir (Lib_name.Local.to_string lib_name ^ ext_lib)
          :: stubs
+     ; js     = stubs
      }
   in
   let foreign_archives =
@@ -133,6 +134,9 @@ let of_library_stanza ~dir
           Path.extend_basename obj_name ~suffix:".cmx" ::
           Path.extend_basename obj_name ~suffix:ext_obj ::
           foreign_archives.native
+      ; js =
+          Path.extend_basename obj_name ~suffix:".cmj" ::
+          foreign_archives.js
       }
     | _ -> foreign_archives
   in

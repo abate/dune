@@ -37,7 +37,7 @@ module External = struct
         [ "t", Dyn.to_sexp (to_dyn t)
         ]
     | Cmi, Public, _
-    | (Cmo | Cmx), _, _ -> t.public_dir
+    | (Cmo | Cmx | Cmj), _, _ -> t.public_dir
 
   let encode
         { public_dir
@@ -68,6 +68,7 @@ module External = struct
 
   let byte_dir t = t.public_dir
   let native_dir t = t.public_dir
+  let js_dir t = t.public_dir
   let dir t = t.public_dir
   let obj_dir t = t.public_dir
 
@@ -84,24 +85,27 @@ module Local = struct
     ; obj_dir: Path.t
     ; native_dir: Path.t
     ; byte_dir: Path.t
+    ; js_dir: Path.t
     ; public_cmi_dir: Path.t option
     }
 
-  let to_dyn { dir; obj_dir; native_dir; byte_dir; public_cmi_dir } =
+  let to_dyn { dir; obj_dir; native_dir; byte_dir; js_dir ; public_cmi_dir } =
     let open Dyn.Encoder in
     record
       [ "dir", Path.to_dyn dir
       ; "obj_dir", Path.to_dyn obj_dir
       ; "native_dir", Path.to_dyn native_dir
       ; "byte_dir", Path.to_dyn byte_dir
+      ; "js_dir", Path.to_dyn js_dir
       ; "public_cmi_dir", option Path.to_dyn public_cmi_dir
       ]
 
-  let make ~dir ~obj_dir ~native_dir ~byte_dir ~public_cmi_dir =
+  let make ~dir ~obj_dir ~native_dir ~byte_dir ~js_dir ~public_cmi_dir =
     { dir
     ; obj_dir
     ; native_dir
     ; byte_dir
+    ; js_dir
     ; public_cmi_dir
     }
 
@@ -114,6 +118,7 @@ module Local = struct
   let obj_dir t = t.obj_dir
   let byte_dir t = t.byte_dir
   let native_dir t = t.native_dir
+  let js_dir t = t.js_dir
 
   let all_obj_dirs t ~(mode : Mode.t) =
     let dirs = [t.byte_dir; public_cmi_dir t] in
@@ -121,6 +126,7 @@ module Local = struct
       match mode with
       | Byte -> dirs
       | Native -> t.native_dir :: dirs
+      | Js -> dirs
     in
     Path.Set.of_list dirs
     |> Path.Set.to_list
@@ -136,6 +142,7 @@ module Local = struct
       ~obj_dir
       ~native_dir:(Utils.library_native_dir ~obj_dir)
       ~byte_dir:(Utils.library_byte_dir ~obj_dir)
+      ~js_dir:(Utils.library_js_dir ~obj_dir)
       ~public_cmi_dir
 
   let make_exe ~dir ~name =
@@ -144,12 +151,14 @@ module Local = struct
       ~obj_dir
       ~native_dir:(Utils.library_native_dir ~obj_dir)
       ~byte_dir:(Utils.library_byte_dir ~obj_dir)
+      ~js_dir:(Utils.library_js_dir ~obj_dir)
       ~public_cmi_dir:None
 
   let cm_dir t cm_kind _ =
     match cm_kind with
     | Cm_kind.Cmx -> native_dir t
     | Cmo | Cmi -> byte_dir t
+    | Cmj -> js_dir t
 end
 
 type t =
@@ -196,6 +205,10 @@ let native_dir = function
   | External e -> External.native_dir e
   | Local e -> Local.native_dir e
 
+let js_dir = function
+  | External e -> External.js_dir e
+  | Local e -> Local.js_dir e
+
 let dir = function
   | External e -> External.dir e
   | Local e -> Local.dir e
@@ -239,3 +252,4 @@ let cm_public_dir t (cm_kind : Cm_kind.t) =
   | Cmx -> native_dir t
   | Cmo -> byte_dir t
   | Cmi -> public_cmi_dir t
+  | Cmj -> js_dir t

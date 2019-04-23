@@ -32,6 +32,12 @@ module Linkage = struct
     ; flags = []
     }
 
+  let js =
+    { mode  = Js
+    ; ext   = ".bs.js"
+    ; flags = []
+    }
+
   let custom =
     { mode  = Byte
     ; ext   = ".exe"
@@ -60,12 +66,14 @@ module Linkage = struct
       | Byte   -> Byte
       | Native -> Native
       | Best   -> Native
+      | Js     -> Js
     in
     let real_mode : Mode.t =
       match m.mode with
       | Byte   -> Byte
       | Native -> Native
       | Best   -> if Option.is_some ctx.ocamlopt then Native else Byte
+      | Js     -> Js
     in
     let ext =
       match wanted_mode, m.kind with
@@ -77,6 +85,10 @@ module Linkage = struct
       | Native , Object        -> ".exe" ^ ctx.ext_obj
       | Byte   , Shared_object -> ".bc"  ^ ctx.ext_dll
       | Native , Shared_object ->          ctx.ext_dll
+      | Js     , Exe           -> ".bs.js"
+      | Js     , Shared_object -> ".bs.js"
+      | Js     , Object        -> ".bs.js"
+      | Js     , C             -> Errors.fail m.loc "C file generation only supports bytecode!"
     in
     let flags =
       match m.kind with
@@ -102,7 +114,7 @@ module Linkage = struct
           List.concat_map ctx.native_c_libraries ~f:(fun flag ->
             ["-cclib"; flag])
           @ so_flags
-        | Byte ->
+        | (Byte | Js) ->
           so_flags
     in
     { ext
@@ -149,6 +161,7 @@ let link_exe
       build >>>
       Build.dyn_paths (Build.arr (fun (modules, _) ->
         artifacts modules ~ext:ctx.ext_obj))
+    | Js -> build
   in
   let arg_spec_for_requires =
     Lazy.force (Mode.Dict.get arg_spec_for_requires mode)

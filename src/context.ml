@@ -60,6 +60,7 @@ type t =
   ; ocamldep                : Path.t
   ; ocamlmklib              : Path.t
   ; ocamlobjinfo            : Path.t option
+  ; bsb                     : Path.t option
   ; env                     : Env.t
   ; findlib                 : Findlib.t
   ; findlib_toolchain       : string option
@@ -124,6 +125,7 @@ let to_dyn t : Dyn.t =
     ; "ocamlopt", option path t.ocamlopt
     ; "ocamldep", path t.ocamldep
     ; "ocamlmklib", path t.ocamlmklib
+    ; "bsb", option path t.bsb
     ; "env", Env.to_dyn (Env.diff t.env Env.initial)
     ; "findlib_path", list path (Findlib.paths t.findlib)
     ; "arch_sixtyfour", Bool t.arch_sixtyfour
@@ -255,12 +257,18 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
     in
 
     let ocamlc =
-      match get_tool_using_findlib_config "ocamlc" with
-      | Some x -> x
-      | None ->
-        match which "ocamlc" with
+      let dune_bsc = Env.get env "DUNE_BSC" in
+      match dune_bsc, which "bsc" with
+      | Some _, Some x -> x
+      | Some _, None -> prog_not_found_in_path "bsc"
+      | None, _ -> begin
+        match get_tool_using_findlib_config "ocamlc" with
         | Some x -> x
-        | None -> prog_not_found_in_path "ocamlc"
+        | None ->
+          match which "ocamlc" with
+          | Some x -> x
+          | None -> prog_not_found_in_path "ocamlc"
+      end
     in
     let dir = Path.parent_exn ocamlc in
     let ocaml_tool_not_found prog =
@@ -441,6 +449,8 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       ; ocamldep     = get_ocaml_tool_exn "ocamldep"
       ; ocamlmklib   = get_ocaml_tool_exn "ocamlmklib"
       ; ocamlobjinfo = which "ocamlobjinfo"
+
+      ; bsb          = which "bsb"
 
       ; env
       ; findlib = Findlib.create ~stdlib_dir ~paths:findlib_paths ~version
@@ -651,6 +661,7 @@ let compiler t (mode : Mode.t) =
   match mode with
   | Byte   -> Some t.ocamlc
   | Native -> t.ocamlopt
+  | Js -> Some t.ocamlc
 
 let best_mode t : Mode.t =
   match t.ocamlopt with

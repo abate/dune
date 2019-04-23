@@ -117,6 +117,9 @@ let library_native_dir ~obj_dir =
 let library_byte_dir ~obj_dir =
   Path.relative obj_dir "byte"
 
+let library_js_dir ~obj_dir =
+  Path.relative obj_dir "byte"
+
 let library_public_cmi_dir ~obj_dir =
   Path.relative obj_dir "public_cmi"
 

@@ -18,6 +18,9 @@ module Linkage : sig
   (** Native compilation, extension [.exe] *)
   val native : t
 
+  (** JS compilation with bucklescript, extension [.js] *)
+  val js : t
+
   (** Byte compilation, link with [-custom], extension [.exe] *)
   val custom : t
 

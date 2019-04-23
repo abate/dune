@@ -14,7 +14,7 @@ let all { files; dlls } =
 module Library = Dune_file.Library
 
 let make ~(ctx : Context.t) ~dir ~dir_contents (lib : Library.t) =
-  let { Mode.Dict.byte; native } =
+  let { Mode.Dict.byte; native ; _ } =
     Dune_file.Mode_conf.Set.eval lib.modes
       ~has_native:(Option.is_some ctx.ocamlopt)
   in

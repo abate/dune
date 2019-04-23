@@ -76,6 +76,9 @@ type t =
   ; ocamlmklib   : Path.t
   ; ocamlobjinfo : Path.t option
 
+  (** bucklescript bin directory *)
+  ; bsb : Import.Path.t option
+
   ; (** Environment variables *)
     env : Env.t
 

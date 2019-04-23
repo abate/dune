@@ -4,6 +4,7 @@ open Build.O
 
 let default_ocamlc_flags   = ["-g"]
 let default_ocamlopt_flags = ["-g"]
+let default_bsc_flags = ["-g"]
 
 let dev_mode_warnings =
   "@a" ^
@@ -50,8 +51,9 @@ module Spec = struct
     let+ common = field_oslu "flags"
     and+ byte = field_oslu "ocamlc_flags"
     and+ native = field_oslu "ocamlopt_flags"
+    and+ js = field_oslu "bsc_flags"
     in
-    let specific = Mode.Dict.make ~native ~byte in
+    let specific = Mode.Dict.make ~native ~byte ~js in
     { common
     ; specific
     }
@@ -73,6 +75,7 @@ let default ~profile =
   ; specific =
       { byte   = Build.return default_ocamlc_flags
       ; native = Build.return default_ocamlopt_flags
+      ; js     = Build.return default_bsc_flags
       }
   }
 
@@ -82,6 +85,7 @@ let make ~spec ~default ~eval =
   ; specific =
       { byte   = f "ocamlc flags"   spec.specific.byte   default.specific.byte
       ; native = f "ocamlopt flags" spec.specific.native default.specific.native
+      ; js     = f "bsc flags" spec.specific.js default.specific.js
       }
   }
 
@@ -101,10 +105,11 @@ let prepend_common flags t = {t with common = t.common >>^ fun l -> flags @ l}
 let common t = t.common
 
 let dump t =
-  Build.fanout3 t.common t.specific.byte t.specific.native
-  >>^ fun (common, byte, native) ->
+  Build.fanout4 t.common t.specific.byte t.specific.native t.specific.js
+  >>^ fun (common, byte, native, js) ->
   List.map ~f:Dune_lang.Encoder.(pair string (list string))
     [ "flags"         , common
     ; "ocamlc_flags"   , byte
     ; "ocamlopt_flags" , native
+    ; "bsc_flags" , js
     ]

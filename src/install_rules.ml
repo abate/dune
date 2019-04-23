@@ -226,7 +226,7 @@ let lib_install_files sctx ~dir_contents ~dir ~sub_dir:lib_subdir
   let ctx = Super_context.context sctx in
   let module_files =
     let if_ cond l = if cond then l else [] in
-    let { Mode.Dict.byte ; native } =
+    let { Mode.Dict.byte ; native ; js } =
       Dune_file.Mode_conf.Set.eval lib.modes
         ~has_native:(Option.is_some ctx.ocamlopt)
     in
@@ -238,6 +238,8 @@ let lib_install_files sctx ~dir_contents ~dir ~sub_dir:lib_subdir
             [ Module.cm_file_unsafe m Cmx ]
         ; if_ (byte && Module.has_impl m && virtual_library)
             [ Module.cm_file_unsafe m Cmo ]
+        ; if_ (js && Module.has_impl m && virtual_library)
+            [ Module.cm_file_unsafe m Cmj ]
         ; if_ (native && Module.has_impl m && virtual_library)
             [ Module.obj_file m ~kind:Cmx ~ext:ctx.ext_obj ]
         ; List.filter_map Ml_kind.all ~f:(Module.cmt_file m)
